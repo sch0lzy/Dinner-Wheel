@@ -642,7 +642,7 @@
     addToWeekBtn.hidden = true;
     currentWinner = null;
 
-    const count = 5;
+    const count = 7;
     const picked = [];
     const pickedThisBatch = new Set();
 
