@@ -27,6 +27,7 @@
   const CUISINE_STORAGE_KEY = 'dinnerWheelCuisines';
   const INGREDIENTS_STORAGE_KEY = 'dinnerWheelIngredients';
   const LIKED_STORAGE_KEY = 'dinnerWheelLikedRecipes';
+  const RECIPES_COLLAPSED_KEY = 'dinnerWheelRecipesCollapsed';
   const CUISINE_OPTIONS = [
     'Unspecified', 'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
     'Thai', 'Indian', 'Mediterranean', 'French', 'Greek', 'Korean', 'Other',
@@ -844,10 +845,15 @@
     renderWeekList();
   });
 
+  const recipesCollapsed = localStorage.getItem(RECIPES_COLLAPSED_KEY) === 'true';
+  recipesBody.hidden = recipesCollapsed;
+  recipesHeader.classList.toggle('collapsed', recipesCollapsed);
+
   recipesHeader.addEventListener('click', () => {
     const collapsed = recipesBody.hidden;
     recipesBody.hidden = !collapsed;
     recipesHeader.classList.toggle('collapsed', !collapsed);
+    localStorage.setItem(RECIPES_COLLAPSED_KEY, String(!collapsed));
   });
 
   groceryListBtn.addEventListener('click', () => {
