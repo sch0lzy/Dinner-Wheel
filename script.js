@@ -194,8 +194,19 @@
           addToDontAgain(name);
         });
 
+        const hideBtn = document.createElement('button');
+        hideBtn.className = 'hide-btn';
+        hideBtn.textContent = 'Hide Recipe';
+        hideBtn.addEventListener('click', () => {
+          hideRecipe(name);
+          weekMeals.splice(idx, 1);
+          saveWeek();
+          renderWeekList();
+        });
+
         reactions.appendChild(likeBtn);
         reactions.appendChild(noLikeBtn);
+        reactions.appendChild(hideBtn);
 
         li.appendChild(topRow);
         li.appendChild(reactions);
@@ -485,9 +496,12 @@
     saveHidden();
     renderRecipeList();
     renderHiddenList();
-    hideRecipeBtn.hidden = true;
-    addToWeekBtn.hidden = true;
-    currentWinner = null;
+    drawWheel();
+    if (currentWinner === name) {
+      hideRecipeBtn.hidden = true;
+      addToWeekBtn.hidden = true;
+      currentWinner = null;
+    }
     resultEl.textContent = `"${name}" hidden. It won't show up on the wheel.`;
   }
 
