@@ -158,6 +158,19 @@
         const span = document.createElement('span');
         span.className = 'recipe-name';
         span.textContent = likedRecipes.includes(name) ? `${name} \u2b50` : name;
+        span.title = likedRecipes.includes(name) ? 'Click the star to unlike' : '';
+        span.style.cursor = likedRecipes.includes(name) ? 'pointer' : '';
+        span.addEventListener('click', () => {
+          if (!likedRecipes.includes(name)) return;
+          likedRecipes = likedRecipes.filter((n) => n !== name);
+          saveLiked();
+          span.textContent = name;
+          span.title = '';
+          span.style.cursor = '';
+          likeBtn.disabled = false;
+          noLikeBtn.disabled = false;
+          li.classList.remove('reacted');
+        });
 
         const btn = document.createElement('button');
         btn.className = 'remove-btn';
