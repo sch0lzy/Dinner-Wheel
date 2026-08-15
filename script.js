@@ -37,6 +37,13 @@
 
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
+  const hubImage = new Image();
+  let hubImageLoaded = false;
+  hubImage.onload = () => {
+    hubImageLoaded = true;
+    drawWheel();
+  };
+  hubImage.src = 'IMG_2459.jpg';
   const spinBtn = document.getElementById('spinBtn');
   const quickWeekBtn = document.getElementById('quickWeekBtn');
   const resultEl = document.getElementById('result');
@@ -572,6 +579,30 @@
       ctx.fillText(label, radius - 12, 0);
       ctx.restore();
     });
+
+    // Center hub image
+    const hubRadius = radius * 0.16;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, hubRadius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    if (hubImageLoaded) {
+      ctx.clip();
+      const iw = hubImage.naturalWidth;
+      const ih = hubImage.naturalHeight;
+      const scale = Math.max((hubRadius * 2) / iw, (hubRadius * 2) / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      ctx.drawImage(hubImage, cx - dw / 2, cy - dh / 2, dw, dh);
+    }
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(cx, cy, hubRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
   }
 
   // Runs the wheel-spin animation, picks an eligible winner, records it in
