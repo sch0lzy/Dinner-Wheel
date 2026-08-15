@@ -1,5 +1,16 @@
 (function () {
   const STORAGE_KEY = 'dinnerWheelRecipes';
+  const HIDDEN_STORAGE_KEY = 'dinnerWheelHiddenRecipes';
+  const HISTORY_STORAGE_KEY = 'dinnerWheelSpinHistory';
+  const HISTORY_LIMIT = 50;
+  const WEEK_STORAGE_KEY = 'dinnerWheelThisWeek';
+  const DONT_AGAIN_STORAGE_KEY = 'dinnerWheelDontMakeAgain';
+  const CUISINE_STORAGE_KEY = 'dinnerWheelCuisines';
+  const INGREDIENTS_STORAGE_KEY = 'dinnerWheelIngredients';
+  const CUISINE_OPTIONS = [
+    'Unspecified', 'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
+    'Thai', 'Indian', 'Mediterranean', 'French', 'Greek', 'Korean', 'Other',
+  ];
   const COLORS = [
     '#f4a261', '#e76f51', '#2a9d8f', '#e9c46a', '#8ab17d',
     '#6d597a', '#eaac8b', '#457b9d', '#f28482', '#b5838d',
@@ -16,10 +27,38 @@
   const clearAllBtn = document.getElementById('clearAllBtn');
   const importFile = document.getElementById('importFile');
   const importStatus = document.getElementById('importStatus');
+  const hideRecipeBtn = document.getElementById('hideRecipeBtn');
+  const toggleHiddenBtn = document.getElementById('toggleHiddenBtn');
+  const hiddenList = document.getElementById('hiddenList');
+  const hiddenCountEl = document.getElementById('hiddenCount');
+  const addToWeekBtn = document.getElementById('addToWeekBtn');
+  const weekList = document.getElementById('weekList');
+  const weekCountEl = document.getElementById('weekCount');
+  const clearWeekBtn = document.getElementById('clearWeekBtn');
+  const groceryListBtn = document.getElementById('groceryListBtn');
+  const groceryPanel = document.getElementById('groceryPanel');
+  const groceryMissing = document.getElementById('groceryMissing');
+  const groceryTextarea = document.getElementById('groceryTextarea');
+  const copyGroceryBtn = document.getElementById('copyGroceryBtn');
+  const downloadGroceryBtn = document.getElementById('downloadGroceryBtn');
+  const recipesHeader = document.getElementById('recipesHeader');
+  const recipesBody = document.getElementById('recipesBody');
+  const toggleDontAgainBtn = document.getElementById('toggleDontAgainBtn');
+  const dontAgainList = document.getElementById('dontAgainList');
+  const dontAgainCountEl = document.getElementById('dontAgainCount');
 
   let recipes = loadRecipes();
+  let hiddenRecipes = loadHidden();
+  let spinHistory = loadHistory();
+  let weekMeals = loadWeek();
+  let dontAgainRecipes = loadDontAgain();
+  let dontAgainPanelOpen = false;
+  let recipeCuisines = loadCuisines();
+  let recipeIngredients = loadIngredients();
   let currentRotation = 0;
   let spinning = false;
+  let currentWinner = null;
+  let hiddenPanelOpen = false;
 
   function loadRecipes() {
     try {
@@ -32,6 +71,301 @@
 
   function saveRecipes() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+  }
+
+  function loadHidden() {
+    try {
+      const raw = localStorage.getItem(HIDDEN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveHidden() {
+    localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(hiddenRecipes));
+  }
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(spinHistory));
+  }
+
+  function loadWeek() {
+    try {
+      const raw = localStorage.getItem(WEEK_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveWeek() {
+    localStorage.setItem(WEEK_STORAGE_KEY, JSON.stringify(weekMeals));
+  }
+
+  function renderWeekList() {
+    weekList.innerHTML = '';
+    if (weekMeals.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'empty-state';
+      li.textContent = 'No meals added yet.';
+      weekList.appendChild(li);
+    } else {
+      weekMeals.forEach((name, idx) => {
+        const li = document.createElement('li');
+
+        const span = document.createElement('span');
+        span.className = 'recipe-name';
+        span.textContent = name;
+
+        const btn = document.createElement('button');
+        btn.className = 'remove-btn';
+        btn.setAttribute('aria-label', `Remove ${name}`);
+        btn.textContent = '✕';
+        btn.addEventListener('click', () => {
+          weekMeals.splice(idx, 1);
+          saveWeek();
+          renderWeekList();
+        });
+
+        const reactions = document.createElement('div');
+        reactions.className = 'reaction-buttons';
+
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'like-btn';
+        likeBtn.textContent = 'Sausage Like';
+
+        const noLikeBtn = document.createElement('button');
+        noLikeBtn.className = 'no-like-btn';
+        noLikeBtn.textContent = 'Sausage No Like';
+
+        likeBtn.addEventListener('click', () => {
+          likeBtn.disabled = true;
+          noLikeBtn.disabled = true;
+          li.classList.add('reacted');
+        });
+
+        noLikeBtn.addEventListener('click', () => {
+          likeBtn.disabled = true;
+          noLikeBtn.disabled = true;
+          li.classList.add('reacted');
+          addToDontAgain(name);
+        });
+
+        reactions.appendChild(likeBtn);
+        reactions.appendChild(noLikeBtn);
+
+        li.appendChild(span);
+        li.appendChild(reactions);
+        li.appendChild(btn);
+        weekList.appendChild(li);
+      });
+    }
+    weekCountEl.textContent = `${weekMeals.length} meal${weekMeals.length === 1 ? '' : 's'}`;
+  }
+
+  function loadDontAgain() {
+    try {
+      const raw = localStorage.getItem(DONT_AGAIN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveDontAgain() {
+    localStorage.setItem(DONT_AGAIN_STORAGE_KEY, JSON.stringify(dontAgainRecipes));
+  }
+
+  function renderDontAgainList() {
+    dontAgainList.innerHTML = '';
+    if (dontAgainRecipes.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'empty-state';
+      li.textContent = 'No recipes here yet.';
+      dontAgainList.appendChild(li);
+    } else {
+      dontAgainRecipes.forEach((name, idx) => {
+        const li = document.createElement('li');
+
+        const span = document.createElement('span');
+        span.className = 'recipe-name';
+        span.textContent = name;
+
+        const btn = document.createElement('button');
+        btn.className = 'restore-btn';
+        btn.textContent = 'Restore';
+        btn.addEventListener('click', () => {
+          dontAgainRecipes.splice(idx, 1);
+          if (!recipes.includes(name)) recipes.push(name);
+          saveDontAgain();
+          saveRecipes();
+          renderDontAgainList();
+          renderRecipeList();
+        });
+
+        li.appendChild(span);
+        li.appendChild(btn);
+        dontAgainList.appendChild(li);
+      });
+    }
+    dontAgainCountEl.textContent = dontAgainRecipes.length;
+  }
+
+  function loadCuisines() {
+    try {
+      const raw = localStorage.getItem(CUISINE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveCuisines() {
+    localStorage.setItem(CUISINE_STORAGE_KEY, JSON.stringify(recipeCuisines));
+  }
+
+  function getCuisine(name) {
+    return recipeCuisines[name] || 'Unspecified';
+  }
+
+  // Cuisines already eaten this week (ignoring 'Unspecified'), used to
+  // steer the wheel away from repeating the same cuisine too often.
+  function getWeekCuisines() {
+    const set = new Set();
+    weekMeals.forEach((name) => {
+      const cuisine = getCuisine(name);
+      if (cuisine !== 'Unspecified') set.add(cuisine);
+    });
+    return set;
+  }
+
+  function loadIngredients() {
+    try {
+      const raw = localStorage.getItem(INGREDIENTS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveIngredients() {
+    localStorage.setItem(INGREDIENTS_STORAGE_KEY, JSON.stringify(recipeIngredients));
+  }
+
+  function addToDontAgain(name) {
+    const idx = recipes.indexOf(name);
+    if (idx !== -1) recipes.splice(idx, 1);
+    if (!dontAgainRecipes.includes(name)) dontAgainRecipes.push(name);
+    saveRecipes();
+    saveDontAgain();
+    renderRecipeList();
+    renderDontAgainList();
+  }
+
+  function buildGroceryList() {
+    const uniqueMeals = Array.from(new Set(weekMeals));
+    // key: normalized ingredient text -> { text, recipes: Set<recipeName> }
+    const groups = new Map();
+    const missing = [];
+
+    uniqueMeals.forEach((name) => {
+      const ingredients = recipeIngredients[name];
+      if (!ingredients || !ingredients.length) {
+        missing.push(name);
+        return;
+      }
+      ingredients.forEach((ingredient) => {
+        const text = ingredient.trim();
+        const key = text.toLowerCase();
+        if (!groups.has(key)) {
+          groups.set(key, { text, recipes: new Set() });
+        }
+        groups.get(key).recipes.add(name);
+      });
+    });
+
+    const items = Array.from(groups.values()).map((g) => g.text);
+    const shared = Array.from(groups.values())
+      .filter((g) => g.recipes.size > 1)
+      .map((g) => ({ text: g.text, recipes: Array.from(g.recipes) }));
+
+    return { items, missing, shared };
+  }
+
+  function showGroceryList() {
+    const { items, missing, shared } = buildGroceryList();
+
+    groceryTextarea.value = items.length
+      ? items.join('\n')
+      : 'No ingredient data available for this week\'s meals.';
+
+    const notices = [];
+    if (shared.length) {
+      const sharedLines = shared
+        .map((g) => `\u2022 ${g.text} \u2014 needed for ${g.recipes.length} recipes: ${g.recipes.join(', ')}`)
+        .join('\n');
+      notices.push(`Shared ingredients (buy extra):\n${sharedLines}`);
+    }
+    if (missing.length) {
+      notices.push(`No ingredient data for: ${missing.join(', ')} (re-import from AnyList to add ingredients, or type them manually above).`);
+    }
+    groceryMissing.textContent = notices.join('\n\n');
+
+    groceryPanel.hidden = false;
+  }
+
+  function addToWeek(name) {
+    weekMeals.push(name);
+    saveWeek();
+    renderWeekList();
+    addToWeekBtn.disabled = true;
+    addToWeekBtn.textContent = 'Added ✓';
+  }
+
+  function recordSpin(name) {
+    spinHistory.push(name);
+    if (spinHistory.length > HISTORY_LIMIT) {
+      spinHistory = spinHistory.slice(-HISTORY_LIMIT);
+    }
+    saveHistory();
+  }
+
+  // Returns the list of recipes eligible to be picked, excluding any that
+  // were selected within the last HISTORY_LIMIT spins. If that would leave
+  // no eligible recipes (e.g. small recipe list), the exclusion window is
+  // shrunk just enough to guarantee at least one eligible recipe.
+  function getEligibleRecipes() {
+    let windowSize = Math.min(HISTORY_LIMIT, Math.max(recipes.length - 1, 0));
+    let pool = recipes.slice();
+    while (windowSize > 0) {
+      const recent = new Set(spinHistory.slice(-windowSize));
+      const eligible = recipes.filter((r) => !recent.has(r));
+      if (eligible.length > 0) {
+        pool = eligible;
+        break;
+      }
+      windowSize--;
+    }
+
+    // Further steer away from cuisines already eaten this week, but only
+    // if that leaves at least one option; otherwise ignore the constraint.
+    const weekCuisines = getWeekCuisines();
+    if (weekCuisines.size > 0) {
+      const cuisineFiltered = pool.filter((r) => !weekCuisines.has(getCuisine(r)));
+      if (cuisineFiltered.length > 0) return cuisineFiltered;
+    }
+
+    return pool;
   }
 
   function renderRecipeList() {
@@ -49,6 +383,21 @@
         span.className = 'recipe-name';
         span.textContent = name;
 
+        const cuisineSelect = document.createElement('select');
+        cuisineSelect.className = 'cuisine-select';
+        cuisineSelect.setAttribute('aria-label', `Cuisine for ${name}`);
+        CUISINE_OPTIONS.forEach((opt) => {
+          const optionEl = document.createElement('option');
+          optionEl.value = opt;
+          optionEl.textContent = opt;
+          cuisineSelect.appendChild(optionEl);
+        });
+        cuisineSelect.value = getCuisine(name);
+        cuisineSelect.addEventListener('change', () => {
+          recipeCuisines[name] = cuisineSelect.value;
+          saveCuisines();
+        });
+
         const btn = document.createElement('button');
         btn.className = 'remove-btn';
         btn.setAttribute('aria-label', `Remove ${name}`);
@@ -56,6 +405,7 @@
         btn.addEventListener('click', () => removeRecipe(idx));
 
         li.appendChild(span);
+        li.appendChild(cuisineSelect);
         li.appendChild(btn);
         recipeListEl.appendChild(li);
       });
@@ -63,6 +413,59 @@
     recipeCountEl.textContent = `${recipes.length} recipe${recipes.length === 1 ? '' : 's'}`;
     spinBtn.disabled = recipes.length < 2;
     drawWheel();
+  }
+
+  function renderHiddenList() {
+    hiddenList.innerHTML = '';
+    if (hiddenRecipes.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'empty-state';
+      li.textContent = 'No hidden recipes.';
+      hiddenList.appendChild(li);
+    } else {
+      hiddenRecipes.forEach((name, idx) => {
+        const li = document.createElement('li');
+
+        const span = document.createElement('span');
+        span.className = 'recipe-name';
+        span.textContent = name;
+
+        const btn = document.createElement('button');
+        btn.className = 'restore-btn';
+        btn.textContent = 'Restore';
+        btn.addEventListener('click', () => restoreRecipe(idx));
+
+        li.appendChild(span);
+        li.appendChild(btn);
+        hiddenList.appendChild(li);
+      });
+    }
+    hiddenCountEl.textContent = hiddenRecipes.length;
+  }
+
+  function hideRecipe(name) {
+    const idx = recipes.findIndex((r) => r === name);
+    if (idx === -1) return;
+    recipes.splice(idx, 1);
+    hiddenRecipes.push(name);
+    saveRecipes();
+    saveHidden();
+    renderRecipeList();
+    renderHiddenList();
+    hideRecipeBtn.hidden = true;
+    addToWeekBtn.hidden = true;
+    currentWinner = null;
+    resultEl.textContent = `"${name}" hidden. It won't show up on the wheel.`;
+  }
+
+  function restoreRecipe(idx) {
+    const [name] = hiddenRecipes.splice(idx, 1);
+    if (name === undefined) return;
+    recipes.push(name);
+    saveRecipes();
+    saveHidden();
+    renderRecipeList();
+    renderHiddenList();
   }
 
   function addRecipe(name) {
@@ -150,9 +553,15 @@
     spinning = true;
     spinBtn.disabled = true;
     resultEl.textContent = '';
+    hideRecipeBtn.hidden = true;
+    addToWeekBtn.hidden = true;
+    currentWinner = null;
+
+    const eligible = getEligibleRecipes();
+    const winnerName = eligible[Math.floor(Math.random() * eligible.length)];
+    const winnerIndex = recipes.indexOf(winnerName);
 
     const segAngle = 360 / recipes.length;
-    const winnerIndex = Math.floor(Math.random() * recipes.length);
     // Random point within the winning segment (avoid exact edges).
     const jitter = (Math.random() * 0.7 + 0.15) * segAngle;
     const winnerAngle = winnerIndex * segAngle + jitter; // angle from top, clockwise
@@ -170,7 +579,13 @@
     setTimeout(() => {
       spinning = false;
       spinBtn.disabled = recipes.length < 2;
-      resultEl.textContent = `🍴 Tonight's dinner: ${recipes[winnerIndex]}`;
+      currentWinner = winnerName;
+      recordSpin(winnerName);
+      resultEl.textContent = `🍴 Tonight's dinner: ${winnerName}`;
+      hideRecipeBtn.hidden = false;
+      addToWeekBtn.hidden = false;
+      addToWeekBtn.disabled = false;
+      addToWeekBtn.textContent = "Add to This Week's Meals";
     }, 4100);
   }
 
@@ -179,18 +594,26 @@
     importStatus.classList.toggle('error', !!isError);
   }
 
-  function extractNames(data) {
+  function extractRecipeEntries(data) {
     if (!Array.isArray(data)) return null;
-    const names = data
+    const entries = data
       .map((item) => {
-        if (typeof item === 'string') return item.trim();
+        if (typeof item === 'string') {
+          const name = item.trim();
+          return name ? { name, ingredients: null } : null;
+        }
         if (item && typeof item === 'object' && typeof item.name === 'string') {
-          return item.name.trim();
+          const name = item.name.trim();
+          if (!name) return null;
+          const ingredients = Array.isArray(item.ingredients)
+            ? item.ingredients.map((i) => String(i).trim()).filter(Boolean)
+            : null;
+          return { name, ingredients };
         }
         return null;
       })
       .filter(Boolean);
-    return names.length ? names : null;
+    return entries.length ? entries : null;
   }
 
   function handleImportFile(file) {
@@ -204,23 +627,27 @@
         showImportStatus('Import failed: file is not valid JSON.', true);
         return;
       }
-      const names = extractNames(data);
-      if (!names) {
+      const entries = extractRecipeEntries(data);
+      if (!entries) {
         showImportStatus('Import failed: expected a JSON array of recipe names or objects with a "name" field.', true);
         return;
       }
       const existing = new Set(recipes.map((r) => r.toLowerCase()));
       let added = 0;
-      names.forEach((name) => {
+      entries.forEach(({ name, ingredients }) => {
         if (!existing.has(name.toLowerCase())) {
           recipes.push(name);
           existing.add(name.toLowerCase());
           added += 1;
         }
+        if (ingredients && ingredients.length) {
+          recipeIngredients[name] = ingredients;
+        }
       });
       saveRecipes();
+      saveIngredients();
       renderRecipeList();
-      const skipped = names.length - added;
+      const skipped = entries.length - added;
       showImportStatus(
         `Imported ${added} recipe${added === 1 ? '' : 's'}${skipped ? ` (${skipped} duplicate${skipped === 1 ? '' : 's'} skipped)` : ''}.`,
         false
@@ -246,5 +673,74 @@
   clearAllBtn.addEventListener('click', clearAll);
   spinBtn.addEventListener('click', spin);
 
+  hideRecipeBtn.addEventListener('click', () => {
+    if (currentWinner) hideRecipe(currentWinner);
+  });
+
+  toggleHiddenBtn.addEventListener('click', () => {
+    hiddenPanelOpen = !hiddenPanelOpen;
+    hiddenList.hidden = !hiddenPanelOpen;
+  });
+
+  addToWeekBtn.addEventListener('click', () => {
+    if (currentWinner) addToWeek(currentWinner);
+  });
+
+  clearWeekBtn.addEventListener('click', () => {
+    if (weekMeals.length === 0) return;
+    if (!confirm("Clear this week's meals?")) return;
+    weekMeals = [];
+    saveWeek();
+    renderWeekList();
+  });
+
+  recipesHeader.addEventListener('click', () => {
+    const collapsed = recipesBody.hidden;
+    recipesBody.hidden = !collapsed;
+    recipesHeader.classList.toggle('collapsed', !collapsed);
+  });
+
+  groceryListBtn.addEventListener('click', () => {
+    if (groceryPanel.hidden) {
+      showGroceryList();
+    } else {
+      groceryPanel.hidden = true;
+    }
+  });
+
+  copyGroceryBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(groceryTextarea.value);
+      copyGroceryBtn.textContent = 'Copied ✓';
+      setTimeout(() => { copyGroceryBtn.textContent = 'Copy to Clipboard'; }, 1500);
+    } catch (e) {
+      groceryTextarea.select();
+    }
+  });
+
+  downloadGroceryBtn.addEventListener('click', () => {
+    const items = groceryTextarea.value
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'grocery-list-export.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  toggleDontAgainBtn.addEventListener('click', () => {
+    dontAgainPanelOpen = !dontAgainPanelOpen;
+    dontAgainList.hidden = !dontAgainPanelOpen;
+  });
+
   renderRecipeList();
+  renderHiddenList();
+  renderWeekList();
+  renderDontAgainList();
 })();

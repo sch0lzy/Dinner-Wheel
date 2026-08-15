@@ -44,6 +44,12 @@ main {
   }
 }
 
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 .wheel-section {
   display: flex;
   flex-direction: column;
@@ -117,6 +123,104 @@ main {
   text-align: center;
 }
 
+.result-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hide-btn {
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b5a4e;
+  background: #fff;
+  border: 1px solid #d9c2a8;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.hide-btn:hover {
+  background: #f5ece1;
+}
+
+.add-week-btn {
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: #4f8a5b;
+  border: 1px solid #4f8a5b;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.add-week-btn:hover {
+  background: #3f7549;
+}
+
+.add-week-btn:disabled {
+  background: #a9c7ae;
+  border-color: #a9c7ae;
+  cursor: not-allowed;
+}
+
+.week-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.week-section h2 {
+  margin-top: 0;
+}
+
+.grocery-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0e6dc;
+}
+
+.grocery-missing {
+  color: #b6431e;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+}
+
+.grocery-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.grocery-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.grocery-hint {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #a08d7d;
+}
+
+.grocery-hint code {
+  background: #f5ece1;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
 .recipes-section {
   background: #fff;
   border-radius: 16px;
@@ -126,6 +230,36 @@ main {
 
 .recipes-section h2 {
   margin-top: 0;
+}
+
+.collapsible-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.collapsible-header h2 {
+  margin: 0;
+}
+
+.collapsible-header .chevron {
+  font-size: 1.2rem;
+  color: #a08d7d;
+  transition: transform 0.2s;
+}
+
+.collapsible-header.collapsed .chevron {
+  transform: rotate(-90deg);
+}
+
+#recipesBody {
+  margin-top: 16px;
 }
 
 .recipe-form {
@@ -180,6 +314,21 @@ main {
 .recipe-name {
   word-break: break-word;
   padding-right: 8px;
+  flex: 1;
+}
+
+.recipe-list li {
+  gap: 8px;
+}
+
+.cuisine-select {
+  font-size: 0.8rem;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  color: #6b5a4e;
+  background: #fff;
+  flex-shrink: 0;
 }
 
 .remove-btn {
@@ -242,6 +391,98 @@ main {
 
 .import-status.error {
   color: #d94f4f;
+}
+
+.toggle-hidden-btn {
+  margin-top: 16px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  border-top: 1px solid #f0e6dc;
+  color: #6b5a4e;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-hidden-btn:hover {
+  color: #b6431e;
+}
+
+.hidden-list {
+  margin-top: 8px;
+  max-height: 220px;
+}
+
+.hidden-list .recipe-name {
+  color: #999;
+}
+
+.restore-btn {
+  background: none;
+  border: 1px solid #4f8a5b;
+  color: #4f8a5b;
+  padding: 3px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.restore-btn:hover {
+  background: #4f8a5b;
+  color: #fff;
+}
+
+.week-list li {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reaction-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.like-btn,
+.no-like-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.like-btn {
+  background: none;
+  border: 1px solid #4f8a5b;
+  color: #4f8a5b;
+}
+
+.like-btn:hover:not(:disabled) {
+  background: #4f8a5b;
+  color: #fff;
+}
+
+.no-like-btn {
+  background: none;
+  border: 1px solid #d94f4f;
+  color: #d94f4f;
+}
+
+.no-like-btn:hover:not(:disabled) {
+  background: #d94f4f;
+  color: #fff;
+}
+
+.like-btn:disabled,
+.no-like-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.week-list li.reacted .recipe-name {
+  color: #999;
 }
 
 .count {

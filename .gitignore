@@ -1,4 +1,5 @@
 node_modules/
 recipes-export.json
+grocery-list-export.json
 .env
 .anylist_credentials
