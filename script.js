@@ -26,6 +26,7 @@
   const DONT_AGAIN_STORAGE_KEY = 'dinnerWheelDontMakeAgain';
   const CUISINE_STORAGE_KEY = 'dinnerWheelCuisines';
   const INGREDIENTS_STORAGE_KEY = 'dinnerWheelIngredients';
+  const LIKED_STORAGE_KEY = 'dinnerWheelLikedRecipes';
   const CUISINE_OPTIONS = [
     'Unspecified', 'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
     'Thai', 'Indian', 'Mediterranean', 'French', 'Greek', 'Korean', 'Other',
@@ -82,6 +83,7 @@
   let dontAgainPanelOpen = false;
   let recipeCuisines = loadCuisines();
   let recipeIngredients = loadIngredients();
+  let likedRecipes = loadLiked();
   let currentRotation = 0;
   let spinning = false;
   let currentWinner = null;
@@ -155,7 +157,7 @@
 
         const span = document.createElement('span');
         span.className = 'recipe-name';
-        span.textContent = name;
+        span.textContent = likedRecipes.includes(name) ? `${name} \u2b50` : name;
 
         const btn = document.createElement('button');
         btn.className = 'remove-btn';
@@ -185,6 +187,11 @@
           likeBtn.disabled = true;
           noLikeBtn.disabled = true;
           li.classList.add('reacted');
+          if (!likedRecipes.includes(name)) {
+            likedRecipes.push(name);
+            saveLiked();
+          }
+          span.textContent = `${name} \u2b50`;
         });
 
         noLikeBtn.addEventListener('click', () => {
@@ -214,6 +221,19 @@
       });
     }
     weekCountEl.textContent = `${weekMeals.length} meal${weekMeals.length === 1 ? '' : 's'}`;
+  }
+
+  function loadLiked() {
+    try {
+      const raw = localStorage.getItem(LIKED_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLiked() {
+    localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRecipes));
   }
 
   function loadDontAgain() {
