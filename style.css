@@ -126,7 +126,7 @@ main {
   }
 
   header {
-    padding-right: 52px;
+    padding: 0 44px;
   }
 
   header h1 {
