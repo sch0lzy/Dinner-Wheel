@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dinner Wheel</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🍽️ Dinner Wheel</h1>
+      <p class="subtitle">Add your recipes, spin the wheel, let fate decide dinner.</p>
+    </header>
+
+    <main>
+      <section class="wheel-section">
+        <div class="wheel-wrapper">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas" width="420" height="420"></canvas>
+        </div>
+        <button id="spinBtn" class="spin-btn">Spin the Wheel</button>
+        <div id="result" class="result" aria-live="polite"></div>
+      </section>
+
+      <section class="recipes-section">
+        <h2>Recipes</h2>
+        <form id="recipeForm" class="recipe-form">
+          <input type="text" id="recipeInput" placeholder="Enter a recipe name..." autocomplete="off" required />
+          <button type="submit">Add</button>
+        </form>
+        <ul id="recipeList" class="recipe-list"></ul>
+        <div class="list-actions">
+          <span id="recipeCount" class="count">0 recipes</span>
+          <div class="list-actions-right">
+            <label for="importFile" class="import-btn">Import Recipes</label>
+            <input type="file" id="importFile" accept="application/json" hidden />
+            <button id="clearAllBtn" class="clear-btn">Clear All</button>
+          </div>
+        </div>
+        <div id="importStatus" class="import-status" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Your recipes are saved locally in this browser.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

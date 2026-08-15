@@ -1,0 +1,13 @@
+{
+  "name": "dinner-wheel-anylist-export",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-only script to export AnyList recipes for import into the Dinner Wheel webpage.",
+  "main": "export-anylist.js",
+  "scripts": {
+    "export": "node export-anylist.js"
+  },
+  "dependencies": {
+    "anylist": "^0.8.6"
+  }
+}

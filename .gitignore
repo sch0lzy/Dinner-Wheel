@@ -1,0 +1,4 @@
+node_modules/
+recipes-export.json
+.env
+.anylist_credentials
