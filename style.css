@@ -64,11 +64,12 @@ header {
 }
 
 .theme-toggle {
-  position: absolute;
-  top: 0;
-  right: 0;
+  position: fixed;
+  top: 16px;
+  right: 16px;
   width: 42px;
   height: 42px;
+  z-index: 10;
   border-radius: 50%;
   border: none;
   background: var(--nm-base);
@@ -125,15 +126,13 @@ main {
     padding: 20px 12px 40px;
   }
 
-  header {
-    padding: 0 44px;
-  }
-
   header h1 {
     font-size: 1.7rem;
   }
 
   .theme-toggle {
+    top: 12px;
+    right: 12px;
     width: 36px;
     height: 36px;
     font-size: 1rem;
