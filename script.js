@@ -1,4 +1,23 @@
 (function () {
+  const THEME_STORAGE_KEY = 'dinnerWheelTheme';
+  const themeToggle = document.getElementById('themeToggle');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(initialTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+    applyTheme(next);
+  });
+
   const STORAGE_KEY = 'dinnerWheelRecipes';
   const HIDDEN_STORAGE_KEY = 'dinnerWheelHiddenRecipes';
   const HISTORY_STORAGE_KEY = 'dinnerWheelSpinHistory';
@@ -19,6 +38,7 @@
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
   const spinBtn = document.getElementById('spinBtn');
+  const quickWeekBtn = document.getElementById('quickWeekBtn');
   const resultEl = document.getElementById('result');
   const recipeForm = document.getElementById('recipeForm');
   const recipeInput = document.getElementById('recipeInput');
@@ -123,6 +143,9 @@
       weekMeals.forEach((name, idx) => {
         const li = document.createElement('li');
 
+        const topRow = document.createElement('div');
+        topRow.className = 'week-item-top';
+
         const span = document.createElement('span');
         span.className = 'recipe-name';
         span.textContent = name;
@@ -136,6 +159,9 @@
           saveWeek();
           renderWeekList();
         });
+
+        topRow.appendChild(span);
+        topRow.appendChild(btn);
 
         const reactions = document.createElement('div');
         reactions.className = 'reaction-buttons';
@@ -164,9 +190,8 @@
         reactions.appendChild(likeBtn);
         reactions.appendChild(noLikeBtn);
 
-        li.appendChild(span);
+        li.appendChild(topRow);
         li.appendChild(reactions);
-        li.appendChild(btn);
         weekList.appendChild(li);
       });
     }
@@ -412,6 +437,7 @@
     }
     recipeCountEl.textContent = `${recipes.length} recipe${recipes.length === 1 ? '' : 's'}`;
     spinBtn.disabled = recipes.length < 2;
+    quickWeekBtn.disabled = recipes.length < 2;
     drawWheel();
   }
 
@@ -548,17 +574,17 @@
     });
   }
 
-  function spin() {
-    if (spinning || recipes.length < 2) return;
-    spinning = true;
-    spinBtn.disabled = true;
-    resultEl.textContent = '';
-    hideRecipeBtn.hidden = true;
-    addToWeekBtn.hidden = true;
-    currentWinner = null;
+  // Runs the wheel-spin animation, picks an eligible winner, records it in
+  // spin history, and resolves with the winner's name once the animation
+  // finishes. Does not touch any result/action button UI.
+  function performSpin(excludeNames) {
+    const eligibleBase = getEligibleRecipes();
+    const eligible = excludeNames && excludeNames.size
+      ? eligibleBase.filter((r) => !excludeNames.has(r))
+      : eligibleBase;
+    const pool = eligible.length ? eligible : eligibleBase;
 
-    const eligible = getEligibleRecipes();
-    const winnerName = eligible[Math.floor(Math.random() * eligible.length)];
+    const winnerName = pool[Math.floor(Math.random() * pool.length)];
     const winnerIndex = recipes.indexOf(winnerName);
 
     const segAngle = 360 / recipes.length;
@@ -576,17 +602,62 @@
     canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
     canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-    setTimeout(() => {
-      spinning = false;
-      spinBtn.disabled = recipes.length < 2;
-      currentWinner = winnerName;
-      recordSpin(winnerName);
-      resultEl.textContent = `🍴 Tonight's dinner: ${winnerName}`;
-      hideRecipeBtn.hidden = false;
-      addToWeekBtn.hidden = false;
-      addToWeekBtn.disabled = false;
-      addToWeekBtn.textContent = "Add to This Week's Meals";
-    }, 4100);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        recordSpin(winnerName);
+        resolve(winnerName);
+      }, 4100);
+    });
+  }
+
+  async function spin() {
+    if (spinning || recipes.length < 2) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    quickWeekBtn.disabled = true;
+    resultEl.textContent = '';
+    hideRecipeBtn.hidden = true;
+    addToWeekBtn.hidden = true;
+    currentWinner = null;
+
+    const winnerName = await performSpin();
+
+    spinning = false;
+    spinBtn.disabled = recipes.length < 2;
+    quickWeekBtn.disabled = recipes.length < 2;
+    currentWinner = winnerName;
+    resultEl.textContent = `🍴 Tonight's dinner: ${winnerName}`;
+    hideRecipeBtn.hidden = false;
+    addToWeekBtn.hidden = false;
+    addToWeekBtn.disabled = false;
+    addToWeekBtn.textContent = "Add to This Week's Meals";
+  }
+
+  async function quickWeek() {
+    if (spinning || recipes.length < 2) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    quickWeekBtn.disabled = true;
+    hideRecipeBtn.hidden = true;
+    addToWeekBtn.hidden = true;
+    currentWinner = null;
+
+    const count = 5;
+    const picked = [];
+    const pickedThisBatch = new Set();
+
+    for (let i = 0; i < count; i++) {
+      resultEl.textContent = `Spinning ${i + 1}/${count}...`;
+      const winnerName = await performSpin(pickedThisBatch);
+      pickedThisBatch.add(winnerName);
+      addToWeek(winnerName);
+      picked.push(winnerName);
+    }
+
+    spinning = false;
+    spinBtn.disabled = recipes.length < 2;
+    quickWeekBtn.disabled = recipes.length < 2;
+    resultEl.textContent = `🍴 Added ${picked.length} recipe${picked.length === 1 ? '' : 's'} to this week!`;
   }
 
   function showImportStatus(message, isError) {
@@ -672,6 +743,7 @@
 
   clearAllBtn.addEventListener('click', clearAll);
   spinBtn.addEventListener('click', spin);
+  quickWeekBtn.addEventListener('click', quickWeek);
 
   hideRecipeBtn.addEventListener('click', () => {
     if (currentWinner) hideRecipe(currentWinner);
