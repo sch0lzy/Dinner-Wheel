@@ -3,101 +3,49 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Random Dinner Wheel</title>
+<title>My Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css?v=15" />
+<link rel="stylesheet" href="landing.css?v=1" />
 </head>
 <body>
-  <div class="app">
-    <header>
+  <div class="landing-app">
+    <header class="landing-header">
       <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
-      <h1>🍽️ Random Dinner Wheel</h1>
-      <p class="subtitle">Let Mr. Bubs decide dinner.</p>
+      <h1>My Projects</h1>
+      <p class="subtitle">Pick a project to open.</p>
     </header>
 
-    <main>
-      <section class="wheel-section">
-        <div class="wheel-wrapper">
-          <div class="pointer"></div>
-          <canvas id="wheelCanvas" width="420" height="420"></canvas>
-        </div>
-        <button id="spinBtn" class="spin-btn">Spin the Wheel</button>
-        <button id="quickWeekBtn" class="quick-week-btn">Quick Week (7 Meals)</button>
-        <div id="result" class="result" aria-live="polite"></div>
-        <div class="result-actions">
-          <button id="addToWeekBtn" class="add-week-btn" hidden>Add to This Week's Meals</button>
-          <button id="hideRecipeBtn" class="hide-btn" hidden>Hide Recipe</button>
-        </div>
-      </section>
+    <main class="project-grid">
+      <a class="project-card" href="dinner-wheel.html">
+        <span class="icon">🍽️</span>
+        <span class="name">Random Dinner Wheel</span>
+        <span class="desc">Spin the wheel to pick tonight's dinner.</span>
+      </a>
 
-      <div class="side-panel">
-      <section class="week-section">
-        <h2>This Week's Meals</h2>
-        <ul id="weekList" class="recipe-list week-list"></ul>
-        <div class="list-actions">
-          <span id="weekCount" class="count">0 meals</span>
-          <div class="list-actions-right">
-            <button id="groceryListBtn" class="import-btn">Grocery List</button>
-            <button id="clearWeekBtn" class="clear-btn">Clear Week</button>
-          </div>
-        </div>
+      <div class="project-card placeholder">
+        <span class="icon">🧩</span>
+        <span class="name">Coming Soon</span>
+        <span class="desc">This project hasn't been built yet.</span>
+      </div>
 
-        <div id="groceryPanel" class="grocery-panel" hidden>
-          <div id="groceryMissing" class="grocery-missing"></div>
-          <textarea id="groceryTextarea" class="grocery-textarea"></textarea>
-          <div class="grocery-actions">
-            <button id="copyGroceryBtn" class="import-btn">Copy to Clipboard</button>
-            <button id="downloadGroceryBtn" class="import-btn">Download JSON</button>
-          </div>
-          <p class="grocery-hint">
-            Download this file, then run <code>node push-to-anylist.js</code> in the
-            <code>scripts</code> folder to add these items to your AnyList grocery list.
-          </p>
-        </div>
-      </section>
+      <div class="project-card placeholder">
+        <span class="icon">🧩</span>
+        <span class="name">Coming Soon</span>
+        <span class="desc">This project hasn't been built yet.</span>
+      </div>
 
-      <section class="recipes-section">
-        <button id="recipesHeader" class="collapsible-header">
-          <h2>Recipes</h2>
-          <span class="chevron">▾</span>
-        </button>
-        <div id="recipesBody">
-        <form id="recipeForm" class="recipe-form">
-          <input type="text" id="recipeInput" placeholder="Enter a recipe name..." autocomplete="off" required />
-          <button type="submit">Add</button>
-        </form>
-        <ul id="recipeList" class="recipe-list"></ul>
-        <div class="list-actions">
-          <span id="recipeCount" class="count">0 recipes</span>
-          <div class="list-actions-right">
-            <label for="importFile" class="import-btn">Import Recipes</label>
-            <input type="file" id="importFile" accept="application/json" hidden />
-            <button id="clearAllBtn" class="clear-btn">Clear All</button>
-          </div>
-        </div>
-        <div id="importStatus" class="import-status" aria-live="polite"></div>
-
-        <button id="toggleHiddenBtn" class="toggle-hidden-btn">
-          Hidden Recipes (<span id="hiddenCount">0</span>)
-        </button>
-        <ul id="hiddenList" class="recipe-list hidden-list" hidden></ul>
-
-        <button id="toggleDontAgainBtn" class="toggle-hidden-btn">
-          Don't Make These Again (<span id="dontAgainCount">0</span>)
-        </button>
-        <ul id="dontAgainList" class="recipe-list hidden-list" hidden></ul>
-        </div>
-      </section>
+      <div class="project-card placeholder">
+        <span class="icon">🧩</span>
+        <span class="name">Coming Soon</span>
+        <span class="desc">This project hasn't been built yet.</span>
       </div>
     </main>
-
-    <footer>
-      <p>Recipes are saved locally in this browser.</p>
-    </footer>
   </div>
 
-  <script src="script.js?v=12"></script>
+  <script src="landing.js?v=1"></script>
 </body>
 </html>
+
