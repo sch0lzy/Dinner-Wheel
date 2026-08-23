@@ -82,6 +82,10 @@
   const dontAgainList = document.getElementById('dontAgainList');
   const dontAgainCountEl = document.getElementById('dontAgainCount');
 
+  function syncPush() {
+    if (window.DinnerWheelSync) window.DinnerWheelSync.push();
+  }
+
   let recipes = loadRecipes();
   let hiddenRecipes = loadHidden();
   let spinHistory = loadHistory();
@@ -109,6 +113,7 @@
 
   function saveRecipes() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+    syncPush();
   }
 
   function loadHidden() {
@@ -122,6 +127,7 @@
 
   function saveHidden() {
     localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(hiddenRecipes));
+    syncPush();
   }
 
   function loadHistory() {
@@ -135,6 +141,7 @@
 
   function saveHistory() {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(spinHistory));
+    syncPush();
   }
 
   function loadWeek() {
@@ -148,6 +155,7 @@
 
   function saveWeek() {
     localStorage.setItem(WEEK_STORAGE_KEY, JSON.stringify(weekMeals));
+    syncPush();
   }
 
   function renderWeekList() {
@@ -256,6 +264,7 @@
 
   function saveLiked() {
     localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRecipes));
+    syncPush();
   }
 
   function loadArchive() {
@@ -269,6 +278,7 @@
 
   function saveArchive() {
     localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(weekArchive));
+    syncPush();
   }
 
   function renderArchiveList() {
@@ -362,6 +372,7 @@
 
   function saveDontAgain() {
     localStorage.setItem(DONT_AGAIN_STORAGE_KEY, JSON.stringify(dontAgainRecipes));
+    syncPush();
   }
 
   function renderDontAgainList() {
@@ -410,6 +421,7 @@
 
   function saveCuisines() {
     localStorage.setItem(CUISINE_STORAGE_KEY, JSON.stringify(recipeCuisines));
+    syncPush();
   }
 
   function getCuisine(name) {
@@ -438,6 +450,7 @@
 
   function saveIngredients() {
     localStorage.setItem(INGREDIENTS_STORAGE_KEY, JSON.stringify(recipeIngredients));
+    syncPush();
   }
 
   function addToDontAgain(name) {
@@ -1043,4 +1056,24 @@
   renderWeekList();
   renderDontAgainList();
   renderArchiveList();
+
+  if (window.DinnerWheelSync) {
+    window.DinnerWheelSync.init(() => {
+      recipes = loadRecipes();
+      hiddenRecipes = loadHidden();
+      spinHistory = loadHistory();
+      weekMeals = loadWeek();
+      dontAgainRecipes = loadDontAgain();
+      recipeCuisines = loadCuisines();
+      recipeIngredients = loadIngredients();
+      likedRecipes = loadLiked();
+      weekArchive = loadArchive();
+      renderRecipeList();
+      renderHiddenList();
+      renderWeekList();
+      renderDontAgainList();
+      renderArchiveList();
+      drawWheel();
+    });
+  }
 })();
