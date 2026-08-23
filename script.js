@@ -27,6 +27,7 @@
   const CUISINE_STORAGE_KEY = 'dinnerWheelCuisines';
   const INGREDIENTS_STORAGE_KEY = 'dinnerWheelIngredients';
   const LIKED_STORAGE_KEY = 'dinnerWheelLikedRecipes';
+  const ARCHIVE_STORAGE_KEY = 'dinnerWheelWeekArchive';
   const RECIPES_COLLAPSED_KEY = 'dinnerWheelRecipesCollapsed';
   const CUISINE_OPTIONS = [
     'Unspecified', 'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
@@ -64,6 +65,10 @@
   const weekList = document.getElementById('weekList');
   const weekCountEl = document.getElementById('weekCount');
   const clearWeekBtn = document.getElementById('clearWeekBtn');
+  const archiveWeekBtn = document.getElementById('archiveWeekBtn');
+  const toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
+  const archiveList = document.getElementById('archiveList');
+  const archiveCountEl = document.getElementById('archiveCount');
   const groceryListBtn = document.getElementById('groceryListBtn');
   const groceryPanel = document.getElementById('groceryPanel');
   const groceryMissing = document.getElementById('groceryMissing');
@@ -85,6 +90,8 @@
   let recipeCuisines = loadCuisines();
   let recipeIngredients = loadIngredients();
   let likedRecipes = loadLiked();
+  let weekArchive = loadArchive();
+  let archivePanelOpen = false;
   let currentRotation = 0;
   let spinning = false;
   let currentWinner = null;
@@ -248,6 +255,79 @@
 
   function saveLiked() {
     localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRecipes));
+  }
+
+  function loadArchive() {
+    try {
+      const raw = localStorage.getItem(ARCHIVE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveArchive() {
+    localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(weekArchive));
+  }
+
+  function renderArchiveList() {
+    archiveList.innerHTML = '';
+    if (weekArchive.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'archive-week-meals';
+      empty.textContent = 'No archived weeks yet.';
+      archiveList.appendChild(empty);
+    } else {
+      weekArchive.forEach((entry, idx) => {
+        const card = document.createElement('div');
+        card.className = 'archive-week';
+
+        const header = document.createElement('div');
+        header.className = 'archive-week-header';
+
+        const dateEl = document.createElement('span');
+        dateEl.className = 'archive-week-date';
+        dateEl.textContent = entry.date;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'archive-delete-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => {
+          weekArchive.splice(idx, 1);
+          saveArchive();
+          renderArchiveList();
+        });
+
+        header.appendChild(dateEl);
+        header.appendChild(deleteBtn);
+
+        const mealsList = document.createElement('ul');
+        mealsList.className = 'archive-week-meals';
+        entry.meals.forEach((meal) => {
+          const li = document.createElement('li');
+          li.textContent = meal;
+          mealsList.appendChild(li);
+        });
+
+        card.appendChild(header);
+        card.appendChild(mealsList);
+        archiveList.appendChild(card);
+      });
+    }
+    archiveCountEl.textContent = weekArchive.length;
+  }
+
+  function archiveWeek() {
+    if (weekMeals.length === 0) return;
+    const date = new Date().toLocaleDateString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+    });
+    weekArchive.unshift({ date, meals: [...weekMeals] });
+    saveArchive();
+    weekMeals = [];
+    saveWeek();
+    renderWeekList();
+    renderArchiveList();
   }
 
   function loadDontAgain() {
@@ -845,6 +925,16 @@
     renderWeekList();
   });
 
+  archiveWeekBtn.addEventListener('click', () => {
+    if (weekMeals.length === 0) return;
+    archiveWeek();
+  });
+
+  toggleArchiveBtn.addEventListener('click', () => {
+    archivePanelOpen = !archivePanelOpen;
+    archiveList.hidden = !archivePanelOpen;
+  });
+
   const recipesCollapsed = localStorage.getItem(RECIPES_COLLAPSED_KEY) === 'true';
   recipesBody.hidden = recipesCollapsed;
   recipesHeader.classList.toggle('collapsed', recipesCollapsed);
@@ -899,4 +989,5 @@
   renderHiddenList();
   renderWeekList();
   renderDontAgainList();
+  renderArchiveList();
 })();

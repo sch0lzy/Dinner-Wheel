@@ -656,6 +656,53 @@ main {
   max-height: 220px;
 }
 
+.archive-list {
+  margin-top: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.archive-week {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--nm-base);
+  box-shadow: var(--shadow-in-sm);
+}
+
+.archive-week-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.archive-week-date {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.archive-week-meals {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.archive-delete-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.archive-delete-btn:hover {
+  color: var(--accent-dark);
+}
+
 .hidden-list .recipe-name {
   color: var(--muted);
 }
