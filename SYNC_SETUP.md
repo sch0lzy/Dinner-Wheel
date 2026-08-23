@@ -16,7 +16,8 @@ Firebase Realtime Database's free tier.
    Keep this tab open — you'll need it in step 4.
 
 ## 3. Create the Realtime Database
-1. In the left sidebar, go to **Build > Realtime Database**.
+1. In the left sidebar, click **Databases & Storage**, then select **Realtime Database**.
+   (Older Firebase UIs list this under a **Build** menu instead — same destination.)
 2. Click **Create Database**, pick any location, choose **Start in test mode**.
 3. Once created, copy the **databaseURL** shown at the top
    (looks like `https://your-project-id-default-rtdb.firebaseio.com`).
