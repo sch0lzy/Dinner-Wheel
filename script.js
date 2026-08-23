@@ -290,6 +290,24 @@
         dateEl.className = 'archive-week-date';
         dateEl.textContent = entry.date;
 
+        const headerBtns = document.createElement('div');
+        headerBtns.className = 'archive-header-btns';
+
+        const restoreBtn = document.createElement('button');
+        restoreBtn.className = 'archive-restore-btn';
+        restoreBtn.textContent = 'Restore to This Week';
+        restoreBtn.addEventListener('click', () => {
+          entry.meals.forEach((meal) => weekMeals.push(meal));
+          saveWeek();
+          renderWeekList();
+          restoreBtn.textContent = 'Restored ✓';
+          restoreBtn.disabled = true;
+          setTimeout(() => {
+            restoreBtn.textContent = 'Restore to This Week';
+            restoreBtn.disabled = false;
+          }, 1500);
+        });
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'archive-delete-btn';
         deleteBtn.textContent = 'Delete';
@@ -299,8 +317,10 @@
           renderArchiveList();
         });
 
+        headerBtns.appendChild(restoreBtn);
+        headerBtns.appendChild(deleteBtn);
         header.appendChild(dateEl);
-        header.appendChild(deleteBtn);
+        header.appendChild(headerBtns);
 
         const mealsList = document.createElement('ul');
         mealsList.className = 'archive-week-meals';

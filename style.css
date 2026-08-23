@@ -677,6 +677,33 @@ main {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  gap: 8px;
+}
+
+.archive-header-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.archive-restore-btn {
+  background: var(--nm-base);
+  border: none;
+  color: var(--success-dark);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.archive-restore-btn:hover {
+  filter: brightness(1.05);
+}
+
+.archive-restore-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .archive-week-date {
