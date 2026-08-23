@@ -56,6 +56,7 @@
   const recipeCountEl = document.getElementById('recipeCount');
   const clearAllBtn = document.getElementById('clearAllBtn');
   const importFile = document.getElementById('importFile');
+  const syncLibraryBtn = document.getElementById('syncLibraryBtn');
   const importStatus = document.getElementById('importStatus');
   const hideRecipeBtn = document.getElementById('hideRecipeBtn');
   const toggleHiddenBtn = document.getElementById('toggleHiddenBtn');
@@ -846,6 +847,25 @@
     return entries.length ? entries : null;
   }
 
+  function mergeRecipeEntries(entries) {
+    const existing = new Set(recipes.map((r) => r.toLowerCase()));
+    let added = 0;
+    entries.forEach(({ name, ingredients }) => {
+      if (!existing.has(name.toLowerCase())) {
+        recipes.push(name);
+        existing.add(name.toLowerCase());
+        added += 1;
+      }
+      if (ingredients && ingredients.length) {
+        recipeIngredients[name] = ingredients;
+      }
+    });
+    saveRecipes();
+    saveIngredients();
+    renderRecipeList();
+    return { added, skipped: entries.length - added };
+  }
+
   function handleImportFile(file) {
     if (!file) return;
     const reader = new FileReader();
@@ -862,22 +882,7 @@
         showImportStatus('Import failed: expected a JSON array of recipe names or objects with a "name" field.', true);
         return;
       }
-      const existing = new Set(recipes.map((r) => r.toLowerCase()));
-      let added = 0;
-      entries.forEach(({ name, ingredients }) => {
-        if (!existing.has(name.toLowerCase())) {
-          recipes.push(name);
-          existing.add(name.toLowerCase());
-          added += 1;
-        }
-        if (ingredients && ingredients.length) {
-          recipeIngredients[name] = ingredients;
-        }
-      });
-      saveRecipes();
-      saveIngredients();
-      renderRecipeList();
-      const skipped = entries.length - added;
+      const { added, skipped } = mergeRecipeEntries(entries);
       showImportStatus(
         `Imported ${added} recipe${added === 1 ? '' : 's'}${skipped ? ` (${skipped} duplicate${skipped === 1 ? '' : 's'} skipped)` : ''}.`,
         false
@@ -887,11 +892,39 @@
     reader.readAsText(file);
   }
 
+  async function syncRecipeLibrary(isAutoLoad) {
+    try {
+      const res = await fetch(`recipes-data.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error('not found');
+      const data = await res.json();
+      const entries = extractRecipeEntries(data);
+      if (!entries) {
+        if (!isAutoLoad) showImportStatus('Sync failed: recipes-data.json is empty or invalid.', true);
+        return;
+      }
+      const { added, skipped } = mergeRecipeEntries(entries);
+      if (!isAutoLoad || added > 0) {
+        showImportStatus(
+          `Synced ${added} new recipe${added === 1 ? '' : 's'} from the shared library${skipped ? ` (${skipped} already present)` : ''}.`,
+          false
+        );
+      }
+    } catch (e) {
+      if (!isAutoLoad) showImportStatus('Sync failed: could not load recipes-data.json.', true);
+    }
+  }
+
   importFile.addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
     handleImportFile(file);
     importFile.value = '';
   });
+
+  syncLibraryBtn.addEventListener('click', () => syncRecipeLibrary(false));
+
+  if (recipes.length === 0) {
+    syncRecipeLibrary(true);
+  }
 
   recipeForm.addEventListener('submit', (e) => {
     e.preventDefault();

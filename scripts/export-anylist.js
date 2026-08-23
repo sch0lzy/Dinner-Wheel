@@ -14,8 +14,9 @@
  *          $env:ANYLIST_PASSWORD="yourpassword"
  *   4. node export-anylist.js
  *
- * Output: ../recipes-export.json (array of { name, ingredients, note })
- * This file is gitignored and never sent anywhere except read by the webpage import button.
+ * Output: ../recipes-data.json (array of { name, ingredients, note })
+ * This file IS committed to the repo so the Dinner Wheel app can automatically
+ * load/sync the same recipe library on any device, without manual import.
  */
 
 const fs = require('fs');
@@ -30,7 +31,7 @@ if (!email || !password) {
   process.exit(1);
 }
 
-const outputPath = path.join(__dirname, '..', 'recipes-export.json');
+const outputPath = path.join(__dirname, '..', 'recipes-data.json');
 
 (async () => {
   const any = new AnyList({ email, password });

@@ -1,7 +1,9 @@
 # AnyList Export Script
 
-Exports your AnyList recipes to `../recipes-export.json`, which you can then load
-into the Dinner Wheel webpage using its **Import from AnyList JSON** button.
+Exports your AnyList recipes to `../recipes-data.json`. This file is committed to
+the repo so the Dinner Wheel app automatically loads the same recipe library on
+any device (no manual import needed on first visit), and lets you click
+**Sync Recipe Library** any time you push an updated export.
 
 This uses the unofficial [`anylist`](https://www.npmjs.com/package/anylist) npm
 package (reverse-engineered API). It is **not** an official AnyList tool, is not
@@ -26,7 +28,7 @@ $env:ANYLIST_PASSWORD="yourpassword"
 node export-anylist.js
 ```
 
-This creates `recipes-export.json` in the project root (one level up), containing
+This creates `recipes-data.json` in the project root (one level up), containing
 an array of your recipes:
 
 ```json
@@ -35,13 +37,16 @@ an array of your recipes:
 ]
 ```
 
-## Import into Dinner Wheel
+## Publishing an updated recipe library
 
-1. Open `index.html` in your browser (or your locally-served/deployed site).
-2. Click **Import Recipes** in the Recipes panel.
-3. Select `recipes-export.json`.
+1. Run the export script above to regenerate `recipes-data.json`.
+2. Commit and push it to GitHub (`git add recipes-data.json`, commit, push).
+3. On any device, open the app and click **Sync Recipe Library** to pull in the
+   new recipes (existing ones are left alone; duplicates are skipped). New
+   devices/browsers with no saved recipes yet will load it automatically.
 
-Recipe names will be added to your wheel (duplicates are skipped), and ingredient
+You can also use **Import Recipes** to load any one-off JSON file by hand;
+recipe names will be added to your wheel (duplicates are skipped), and ingredient
 lists are stored per-recipe so they can be used to build a grocery list later.
 
 ## Sending This Week's Meals ingredients back to AnyList
