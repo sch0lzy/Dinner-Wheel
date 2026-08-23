@@ -16,11 +16,11 @@
 // Leaving apiKey blank disables cross-device sync entirely; the app falls
 // back to local-only storage as before.
 window.firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: "",
+  apiKey: "AIzaSyDI0T_afy3AwXV45n04Rs99gBkZNfLHjEo",
+  authDomain: "random-dinner-spinner.firebaseapp.com",
+  databaseURL: "https://random-dinner-spinner-default-rtdb.firebaseio.com/",
+  projectId: "random-dinner-spinner",
+  storageBucket: "random-dinner-spinner.firebasestorage.app",
+  messagingSenderId: "42670098905",
+  appId: "1:42670098905:web:c4a06c973ea301981ef1c8",
 };
