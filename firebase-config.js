@@ -24,3 +24,12 @@ window.firebaseConfig = {
   messagingSenderId: "42670098905",
   appId: "1:42670098905:web:c4a06c973ea301981ef1c8",
 };
+
+// Optional: get a push notification whenever a new account is created.
+// Uses ntfy.sh (free, no account needed):
+//   1. Pick a hard-to-guess topic name (it's like a password — anyone who
+//      knows it can read/send to it), e.g. "dinner-wheel-x7k2q9".
+//   2. Put it below, then subscribe to that topic in the ntfy app on your
+//      phone (or at https://ntfy.sh) to get the notifications.
+// Leave blank to disable.
+window.signupNotifyTopic = "";

@@ -918,6 +918,12 @@ main {
   box-shadow: var(--shadow-in-sm);
 }
 
+.gate-msg {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 @media (max-width: 520px) {
   .auth-form input {
     font-size: 16px;

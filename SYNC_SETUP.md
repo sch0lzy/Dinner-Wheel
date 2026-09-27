@@ -74,16 +74,31 @@ can read/write it.
            ".read": "auth.uid === $uid",
            ".write": "auth.uid === $uid"
          }
+       },
+       "signups": {
+         "$uid": {
+           ".write": "auth.uid === $uid"
+         }
        }
      }
    }
    ```
    then **Publish**. This scopes each signed-in user to their own data
    node (`users/<uid>/...`), so even if someone registers an account on
-   your project they can't see or touch your state.
-4. Reload the app, enter an email + password, and click **Create Account**
-   once. Sign in with the **same account** on every device — the data is
-   stored per-account, so different accounts get separate wheels.
+   your project they can't see or touch your state. The `signups` node
+   lets the app record each new account (email + timestamp) — viewable in
+   the console under Data > signups and Authentication > Users.
+4. Reload the app. The whole app is gated behind sign-in — enter an
+   email + password and click **Create Account** once. Sign in with the
+   **same account** on every device — the data is stored per-account, so
+   different accounts get separate wheels.
+
+### Optional: push notification on new signups
+To get pinged whenever a new account is created, set
+`window.signupNotifyTopic` in `firebase-config.js` to a hard-to-guess
+topic name and subscribe to it in the ntfy app or at https://ntfy.sh.
+Leave it blank to skip — signups are still recorded in the database and
+listed under Authentication > Users either way.
 
 Note for private browsing: sign-in state itself isn't remembered after the
 tab closes, so you'll sign in once per session — all your data comes back

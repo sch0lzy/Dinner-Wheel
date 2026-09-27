@@ -88,6 +88,8 @@
   const authCreateBtn = document.getElementById('authCreateBtn');
   const authSignOutBtn = document.getElementById('authSignOutBtn');
   const authStatus = document.getElementById('authStatus');
+  const appMain = document.getElementById('appMain');
+  const gateMsg = document.getElementById('gateMsg');
 
   function syncPush() {
     if (window.DinnerWheelSync) window.DinnerWheelSync.push();
@@ -1088,9 +1090,14 @@
       });
   }
 
-  if (window.DinnerWheelSync && window.DinnerWheelSync.authSupported && window.DinnerWheelSync.authSupported()) {
+  if (window.DinnerWheelSync && window.DinnerWheelSync.authSupported && window.DinnerWheelSync.authSupported()
+      && window.firebaseConfig && window.firebaseConfig.apiKey) {
     authBar.hidden = false;
-    authStatus.textContent = 'Not signed in — changes stay on this device only';
+    // Gate the whole app behind sign-in until auth state resolves.
+    appMain.hidden = true;
+    gateMsg.hidden = false;
+    gateMsg.textContent = 'Checking sign-in…';
+    authStatus.textContent = 'Sign in to continue';
     authForm.addEventListener('submit', (e) => {
       e.preventDefault();
       runAuth(window.DinnerWheelSync.signIn(authEmail.value, authPassword.value), 'Signing in…');
@@ -1110,9 +1117,12 @@
       authStatus.classList.remove('error');
       authForm.hidden = !!user;
       authSignOutBtn.hidden = !user;
+      appMain.hidden = !user;
+      gateMsg.hidden = !!user;
+      if (!user) gateMsg.textContent = 'Sign in above to load your dinner wheel.';
       authStatus.textContent = user
         ? `Signed in as ${user.email} — syncing`
-        : 'Not signed in — changes stay on this device only';
+        : 'Sign in to continue';
     });
   }
 

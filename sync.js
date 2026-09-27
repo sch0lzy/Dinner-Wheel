@@ -24,6 +24,7 @@
   const PUSH_DEBOUNCE_MS = 300;
 
   let dbRef = null;
+  let database = null;
   let auth = null;
   let listening = false;
   let onRemoteUpdate = null;
@@ -101,7 +102,7 @@
     if (!global.firebase.apps.length) {
       global.firebase.initializeApp(global.firebaseConfig);
     }
-    const database = global.firebase.database();
+    database = global.firebase.database();
 
     if (authSupported()) {
       auth = global.firebase.auth();
@@ -153,7 +154,29 @@
   }
 
   function signUp(email, password) {
-    return requireAuth() || auth.createUserWithEmailAndPassword(email, password);
+    const err = requireAuth();
+    if (err) return err;
+    return auth.createUserWithEmailAndPassword(email, password).then((cred) => {
+      const user = cred.user;
+      const uid = user && user.uid;
+      const addr = (user && user.email) || email;
+      // Record the signup so it's visible in the Firebase console
+      // (Realtime Database > Data > signups, and Authentication > Users).
+      if (database && uid) {
+        database.ref(`signups/${uid}`)
+          .set({ email: addr, createdAt: Date.now() })
+          .catch(() => {});
+      }
+      // Optional push notification via ntfy.sh — set
+      // window.signupNotifyTopic in firebase-config.js to enable.
+      if (global.signupNotifyTopic) {
+        fetch(`https://ntfy.sh/${encodeURIComponent(global.signupNotifyTopic)}`, {
+          method: 'POST',
+          body: `New Dinner Wheel account created: ${addr}`,
+        }).catch(() => {});
+      }
+      return cred;
+    });
   }
 
   function signOut() {

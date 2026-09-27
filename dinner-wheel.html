@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=18" />
+<link rel="stylesheet" href="style.css?v=19" />
 </head>
 <body>
   <a href="index.html" class="back-link">&larr; All Projects</a>
@@ -26,9 +26,10 @@
         </form>
         <button id="authSignOutBtn" class="auth-btn secondary" hidden>Sign Out</button>
       </div>
+      <p id="gateMsg" class="gate-msg" hidden></p>
     </header>
 
-    <main>
+    <main id="appMain">
       <section class="wheel-section">
         <div class="wheel-wrapper">
           <div class="pointer"></div>
@@ -119,8 +120,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="sync.js"></script>
-  <script src="script.js?v=17"></script>
+  <script src="firebase-config.js?v=2"></script>
+  <script src="sync.js?v=2"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>
