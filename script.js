@@ -81,6 +81,13 @@
   const toggleDontAgainBtn = document.getElementById('toggleDontAgainBtn');
   const dontAgainList = document.getElementById('dontAgainList');
   const dontAgainCountEl = document.getElementById('dontAgainCount');
+  const authBar = document.getElementById('authBar');
+  const authForm = document.getElementById('authForm');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const authCreateBtn = document.getElementById('authCreateBtn');
+  const authSignOutBtn = document.getElementById('authSignOutBtn');
+  const authStatus = document.getElementById('authStatus');
 
   function syncPush() {
     if (window.DinnerWheelSync) window.DinnerWheelSync.push();
@@ -1056,6 +1063,58 @@
   renderWeekList();
   renderDontAgainList();
   renderArchiveList();
+
+  function authErrorMessage(err) {
+    const messages = {
+      'auth/invalid-email': 'That email address looks invalid.',
+      'auth/user-not-found': 'No account found for that email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/email-already-in-use': 'That email already has an account — sign in instead.',
+      'auth/weak-password': 'Password is too weak (needs 6+ characters).',
+      'auth/operation-not-allowed': 'Email/password sign-in is not enabled in Firebase yet.',
+      'auth/too-many-requests': 'Too many attempts — try again in a bit.',
+    };
+    return (err && messages[err.code]) || (err && err.message) || 'Something went wrong.';
+  }
+
+  function runAuth(action, pendingText) {
+    authStatus.textContent = pendingText;
+    action
+      .then(() => { authPassword.value = ''; })
+      .catch((err) => {
+        authStatus.textContent = authErrorMessage(err);
+        authStatus.classList.add('error');
+      });
+  }
+
+  if (window.DinnerWheelSync && window.DinnerWheelSync.authSupported && window.DinnerWheelSync.authSupported()) {
+    authBar.hidden = false;
+    authStatus.textContent = 'Not signed in — changes stay on this device only';
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      runAuth(window.DinnerWheelSync.signIn(authEmail.value, authPassword.value), 'Signing in…');
+    });
+    authCreateBtn.addEventListener('click', () => {
+      if (!authEmail.value || !authPassword.value) {
+        authStatus.textContent = 'Enter an email and password first.';
+        authStatus.classList.add('error');
+        return;
+      }
+      runAuth(window.DinnerWheelSync.signUp(authEmail.value, authPassword.value), 'Creating account…');
+    });
+    authSignOutBtn.addEventListener('click', () => {
+      window.DinnerWheelSync.signOut().catch(() => {});
+    });
+    window.DinnerWheelSync.onAuthChange((user) => {
+      authStatus.classList.remove('error');
+      authForm.hidden = !!user;
+      authSignOutBtn.hidden = !user;
+      authStatus.textContent = user
+        ? `Signed in as ${user.email} — syncing`
+        : 'Not signed in — changes stay on this device only';
+    });
+  }
 
   if (window.DinnerWheelSync) {
     window.DinnerWheelSync.init(() => {

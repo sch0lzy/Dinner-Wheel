@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css?v=17" />
+<link rel="stylesheet" href="style.css?v=18" />
 </head>
 <body>
   <a href="index.html" class="back-link">&larr; All Projects</a>
@@ -16,6 +16,16 @@
       <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
       <h1>🍽️ Random Dinner Wheel</h1>
       <p class="subtitle">Let Mr. Bubs decide dinner.</p>
+      <div id="authBar" class="auth-bar" hidden>
+        <span id="authStatus" class="auth-status"></span>
+        <form id="authForm" class="auth-form">
+          <input type="email" id="authEmail" placeholder="Email" autocomplete="email" required />
+          <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required />
+          <button type="submit" class="auth-btn">Sign In</button>
+          <button type="button" id="authCreateBtn" class="auth-btn secondary">Create Account</button>
+        </form>
+        <button id="authSignOutBtn" class="auth-btn secondary" hidden>Sign Out</button>
+      </div>
     </header>
 
     <main>
@@ -102,14 +112,15 @@
     </main>
 
     <footer>
-      <p>Recipes are saved locally in this browser.</p>
+      <p>Saved in this browser &mdash; sign in to sync across devices.</p>
     </footer>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="sync.js"></script>
-  <script src="script.js?v=16"></script>
+  <script src="script.js?v=17"></script>
 </body>
 </html>

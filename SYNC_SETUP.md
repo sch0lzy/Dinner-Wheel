@@ -53,3 +53,38 @@ result/meal list/etc. will update live on your phone too.
 
 Leaving `apiKey` blank keeps sync disabled and the app works exactly as before
 (local-only storage per device).
+
+## 5. Optional: sign-in to sync (recommended)
+
+The app supports email/password sign-in. Once enabled, syncing only runs
+while you're signed in — useful for private/incognito browsing (where
+localStorage is wiped on close) and for locking the database so only you
+can read/write it.
+
+1. In the Firebase console, go to **Build > Authentication > Get started**.
+2. Under **Sign-in method**, enable **Email/Password** and save.
+   (You don't need to create a user here — the app's "Create Account"
+   button does that.)
+3. Go to **Realtime Database > Rules** and replace the rules with:
+   ```json
+   {
+     "rules": {
+       "users": {
+         "$uid": {
+           ".read": "auth.uid === $uid",
+           ".write": "auth.uid === $uid"
+         }
+       }
+     }
+   }
+   ```
+   then **Publish**. This scopes each signed-in user to their own data
+   node (`users/<uid>/...`), so even if someone registers an account on
+   your project they can't see or touch your state.
+4. Reload the app, enter an email + password, and click **Create Account**
+   once. Sign in with the **same account** on every device — the data is
+   stored per-account, so different accounts get separate wheels.
+
+Note for private browsing: sign-in state itself isn't remembered after the
+tab closes, so you'll sign in once per session — all your data comes back
+as soon as you do.
