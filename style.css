@@ -41,6 +41,12 @@ html[data-theme='dark'] {
   box-sizing: border-box;
 }
 
+/* The `hidden` attribute loses to any author `display` rule (e.g.
+   main { display: grid }), so it needs to win explicitly. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
