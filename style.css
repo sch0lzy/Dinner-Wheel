@@ -792,6 +792,7 @@ main {
 }
 
 .like-btn,
+.aight-btn,
 .no-like-btn {
   padding: 5px 12px;
   border-radius: var(--radius-sm);
@@ -808,24 +809,28 @@ main {
   color: var(--success-dark);
 }
 
-.like-btn:hover:not(:disabled) {
-  box-shadow: var(--shadow-out);
+.aight-btn {
+  color: var(--info-dark);
 }
 
 .no-like-btn {
   color: var(--accent-dark);
 }
 
+.like-btn:hover:not(:disabled),
+.aight-btn:hover:not(:disabled),
 .no-like-btn:hover:not(:disabled) {
   box-shadow: var(--shadow-out);
 }
 
 .like-btn:active:not(:disabled),
+.aight-btn:active:not(:disabled),
 .no-like-btn:active:not(:disabled) {
   box-shadow: var(--shadow-in-sm);
 }
 
 .like-btn:disabled,
+.aight-btn:disabled,
 .no-like-btn:disabled {
   box-shadow: var(--shadow-in-sm);
   opacity: 0.5;
@@ -834,6 +839,29 @@ main {
 
 .week-list li.reacted .recipe-name {
   color: var(--muted);
+}
+
+/* Liked names stay the same green as the Sausage Like button even when
+   the row is dimmed by .reacted. */
+.week-list li.reacted .recipe-name.liked {
+  color: var(--success-dark);
+}
+
+.aight-badge {
+  background: var(--nm-base);
+  border: none;
+  color: var(--info-dark);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: var(--shadow-in-sm);
+  flex-shrink: 0;
+}
+
+.aight-badge:hover {
+  box-shadow: var(--shadow-out-sm);
 }
 
 .count {

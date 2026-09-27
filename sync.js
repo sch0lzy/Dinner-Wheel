@@ -20,6 +20,8 @@
     'dinnerWheelLikedRecipes',
     'dinnerWheelWeekArchive',
     'dinnerWheelSpinHistory',
+    'dinnerWheelAight',
+    'dinnerWheelSpinTotal',
   ];
   const PUSH_DEBOUNCE_MS = 300;
 

@@ -28,6 +28,9 @@
   const INGREDIENTS_STORAGE_KEY = 'dinnerWheelIngredients';
   const LIKED_STORAGE_KEY = 'dinnerWheelLikedRecipes';
   const ARCHIVE_STORAGE_KEY = 'dinnerWheelWeekArchive';
+  const AIGHT_STORAGE_KEY = 'dinnerWheelAight';
+  const SPIN_TOTAL_KEY = 'dinnerWheelSpinTotal';
+  const AIGHT_COOLDOWN = 200;
   const RECIPES_COLLAPSED_KEY = 'dinnerWheelRecipesCollapsed';
   const CUISINE_OPTIONS = [
     'Unspecified', 'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
@@ -105,6 +108,8 @@
   let recipeIngredients = loadIngredients();
   let likedRecipes = loadLiked();
   let weekArchive = loadArchive();
+  let aightRecipes = loadAight();
+  let spinTotal = loadSpinTotal();
   let archivePanelOpen = false;
   let currentRotation = 0;
   let spinning = false;
@@ -177,6 +182,13 @@
     } else {
       weekMeals.forEach((name, idx) => {
         const li = document.createElement('li');
+        const isLiked = likedRecipes.includes(name);
+        const isNoLike = dontAgainRecipes.includes(name);
+        const aightUntil = aightRecipes[name];
+        const isAight = aightUntil !== undefined;
+        const aightRemaining = isAight ? Math.max(aightUntil - spinTotal, 0) : 0;
+        const reacted = isLiked || isNoLike || isAight;
+        if (reacted) li.classList.add('reacted');
 
         const topRow = document.createElement('div');
         topRow.className = 'week-item-top';
@@ -184,18 +196,14 @@
         const span = document.createElement('span');
         span.className = 'recipe-name';
         span.textContent = likedRecipes.includes(name) ? `${name} \u2b50` : name;
-        span.title = likedRecipes.includes(name) ? 'Click the star to unlike' : '';
-        span.style.cursor = likedRecipes.includes(name) ? 'pointer' : '';
+        if (isLiked) span.classList.add('liked');
+        span.title = isLiked ? 'Click the star to unlike' : '';
+        span.style.cursor = isLiked ? 'pointer' : '';
         span.addEventListener('click', () => {
           if (!likedRecipes.includes(name)) return;
           likedRecipes = likedRecipes.filter((n) => n !== name);
           saveLiked();
-          span.textContent = name;
-          span.title = '';
-          span.style.cursor = '';
-          likeBtn.disabled = false;
-          noLikeBtn.disabled = false;
-          li.classList.remove('reacted');
+          renderWeekList();
         });
 
         const btn = document.createElement('button');
@@ -209,6 +217,22 @@
         });
 
         topRow.appendChild(span);
+        if (isAight) {
+          const badge = document.createElement('button');
+          badge.className = 'aight-badge';
+          badge.textContent = aightRemaining > 0
+            ? `aight · back in ${aightRemaining}`
+            : 'aight';
+          badge.title = aightRemaining > 0
+            ? `Excluded from the wheel for ${aightRemaining} more spins — click to remove`
+            : 'Back in rotation, re-cools down if it wins — click to remove';
+          badge.addEventListener('click', () => {
+            delete aightRecipes[name];
+            saveAight();
+            renderWeekList();
+          });
+          topRow.appendChild(badge);
+        }
         topRow.appendChild(btn);
 
         const reactions = document.createElement('div');
@@ -217,27 +241,39 @@
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
         likeBtn.textContent = 'Sausage Like';
+        likeBtn.disabled = reacted;
+
+        const aightBtn = document.createElement('button');
+        aightBtn.className = 'aight-btn';
+        aightBtn.textContent = "It's aight";
+        aightBtn.disabled = reacted;
 
         const noLikeBtn = document.createElement('button');
         noLikeBtn.className = 'no-like-btn';
         noLikeBtn.textContent = 'Sausage No Like';
+        noLikeBtn.disabled = reacted;
 
         likeBtn.addEventListener('click', () => {
-          likeBtn.disabled = true;
-          noLikeBtn.disabled = true;
-          li.classList.add('reacted');
           if (!likedRecipes.includes(name)) {
             likedRecipes.push(name);
             saveLiked();
           }
-          span.textContent = `${name} \u2b50`;
+          if (aightRecipes[name] !== undefined) {
+            delete aightRecipes[name];
+            saveAight();
+          }
+          renderWeekList();
+        });
+
+        aightBtn.addEventListener('click', () => {
+          aightRecipes[name] = spinTotal + AIGHT_COOLDOWN;
+          saveAight();
+          renderWeekList();
         });
 
         noLikeBtn.addEventListener('click', () => {
-          likeBtn.disabled = true;
-          noLikeBtn.disabled = true;
-          li.classList.add('reacted');
           addToDontAgain(name);
+          renderWeekList();
         });
 
         const hideBtn = document.createElement('button');
@@ -251,6 +287,7 @@
         });
 
         reactions.appendChild(likeBtn);
+        reactions.appendChild(aightBtn);
         reactions.appendChild(noLikeBtn);
         reactions.appendChild(hideBtn);
 
@@ -273,6 +310,30 @@
 
   function saveLiked() {
     localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRecipes));
+    syncPush();
+  }
+
+  function loadAight() {
+    try {
+      const raw = localStorage.getItem(AIGHT_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveAight() {
+    localStorage.setItem(AIGHT_STORAGE_KEY, JSON.stringify(aightRecipes));
+    syncPush();
+  }
+
+  function loadSpinTotal() {
+    const raw = parseInt(localStorage.getItem(SPIN_TOTAL_KEY), 10);
+    return Number.isFinite(raw) ? raw : 0;
+  }
+
+  function saveSpinTotal() {
+    localStorage.setItem(SPIN_TOTAL_KEY, String(spinTotal));
     syncPush();
   }
 
@@ -466,6 +527,10 @@
     const idx = recipes.indexOf(name);
     if (idx !== -1) recipes.splice(idx, 1);
     if (!dontAgainRecipes.includes(name)) dontAgainRecipes.push(name);
+    if (aightRecipes[name] !== undefined) {
+      delete aightRecipes[name];
+      saveAight();
+    }
     saveRecipes();
     saveDontAgain();
     renderRecipeList();
@@ -537,7 +602,15 @@
     if (spinHistory.length > HISTORY_LIMIT) {
       spinHistory = spinHistory.slice(-HISTORY_LIMIT);
     }
+    spinTotal += 1;
+    saveSpinTotal();
     saveHistory();
+    // An "aight" recipe that wins goes back into cooldown automatically.
+    if (aightRecipes[name] !== undefined) {
+      aightRecipes[name] = spinTotal + AIGHT_COOLDOWN;
+      saveAight();
+      renderWeekList();
+    }
   }
 
   // Returns the list of recipes eligible to be picked, excluding any that
@@ -556,6 +629,14 @@
       }
       windowSize--;
     }
+
+    // Exclude "It's aight" recipes still inside their cooldown window —
+    // unless that would leave nothing to pick.
+    const notCooling = pool.filter((r) => {
+      const until = aightRecipes[r];
+      return until === undefined || until <= spinTotal;
+    });
+    if (notCooling.length) pool = notCooling;
 
     // Further steer away from cuisines already eaten this week, but only
     // if that leaves at least one option; otherwise ignore the constraint.
@@ -1137,6 +1218,8 @@
       recipeIngredients = loadIngredients();
       likedRecipes = loadLiked();
       weekArchive = loadArchive();
+      aightRecipes = loadAight();
+      spinTotal = loadSpinTotal();
       renderRecipeList();
       renderHiddenList();
       renderWeekList();
