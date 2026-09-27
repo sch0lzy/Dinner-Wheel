@@ -12,6 +12,7 @@
   --accent-dark: #b83b78;
   --success: #2fae66;
   --success-dark: #1f8f52;
+  --aight: #a08c1e;
   --radius-lg: 26px;
   --radius-md: 16px;
   --radius-sm: 12px;
@@ -35,6 +36,7 @@ html[data-theme='dark'] {
   --accent-dark: #ef5cb0;
   --success: #50fa7b;
   --success-dark: #34d668;
+  --aight: #e8d67a;
 }
 
 * {
@@ -722,6 +724,14 @@ main {
   padding-left: 18px;
   color: var(--muted);
   font-size: 0.88rem;
+}
+
+.archive-week-meals li.liked {
+  color: var(--success-dark);
+}
+
+.archive-week-meals li.aight {
+  color: var(--aight);
 }
 
 .archive-delete-btn {

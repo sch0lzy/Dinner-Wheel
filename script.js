@@ -407,6 +407,8 @@
         entry.meals.forEach((meal) => {
           const li = document.createElement('li');
           li.textContent = meal;
+          if (likedRecipes.includes(meal)) li.classList.add('liked');
+          else if (aightRecipes[meal] !== undefined) li.classList.add('aight');
           mealsList.appendChild(li);
         });
 
